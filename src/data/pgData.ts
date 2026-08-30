@@ -1,0 +1,340 @@
+import { RoomTariff, Amenity, FoodMeal, HostelRule, ContactPerson, NearbyPlace } from '../types';
+
+export const PG_INFO = {
+  name: "Sri Vaikundam Men's PG",
+  shortName: "Sri Vaikundam PG",
+  tagline: "Comfortable, Safe & Homely Living in Sholinganallur",
+  address: "Sri Vaikundam Men's PG, Sholinganallur, Chennai, Tamil Nadu - 600119",
+  landmark: "Near Sholinganallur Junction & OMR IT Corridor",
+  primaryPhone: "7561964726",
+  whatsappNumber: "+917561964726",
+  email: "srivaikundampg@gmail.com",
+  foodAddonPrice: 2500, // ₹2,500/month extra for 3-Times Homely Food
+  guestRatePerDay: 400, // ₹400/day
+  securityDeposit: 2000, // Nominal refundable deposit
+  maintenanceFee: 0, // No hidden charges
+};
+
+export const CONTACT_NUMBERS: ContactPerson[] = [
+  {
+    number: "7561964726",
+    displayNumber: "+91 75619 64726",
+    label: "Manager / Primary Desk",
+    role: "Admission & Room Enquiries (24x7)",
+    isPrimary: true,
+  },
+  {
+    number: "9790741811",
+    displayNumber: "+91 97907 41811",
+    label: "Hostel Warden / Support",
+    role: "Room Allocation & Facilities",
+  },
+  {
+    number: "9941044466",
+    displayNumber: "+91 99410 44466",
+    label: "Management Desk",
+    role: "Accounts & Billing",
+  },
+];
+
+export const ROOM_TARIFFS: RoomTariff[] = [
+  {
+    sharing: 1,
+    title: "1 Sharing (Single Room)",
+    subtitle: "Maximum privacy & personal space for working professionals",
+    badge: "Premium & Private",
+    acPrice: 8000,
+    nonAcPrice: 6000,
+    recommendedFor: "Senior Software Engineers, Remote Tech Workers & Team Leads",
+    availability: "Few Beds Left",
+    features: [
+      "Dedicated wooden bed & comfortable orthopaedic mattress",
+      "Private study table, executive chair & electrical hub",
+      "Individual large steel wardrobe with personal lock",
+      "Attached clean bathroom with hot water geyser",
+      "Spacious ventilation with balcony window",
+      "High-speed 100 Mbps Wi-Fi router access",
+    ],
+  },
+  {
+    sharing: 2,
+    title: "2 Sharing (Twin Room)",
+    subtitle: "Perfect balance of comfort, spacious layout & economy",
+    badge: "Most Popular",
+    acPrice: 7000,
+    nonAcPrice: 5000,
+    recommendedFor: "IT Professionals, ITIL Analysts, Tech Buddies",
+    availability: "Available",
+    features: [
+      "2 Separate single beds with individual side spaces",
+      "2 Individual full-height wardrobes with personal keys",
+      "Attached western bathroom with 24/7 hot water",
+      "Airy cross-ventilation & bright natural lighting",
+      "Dedicated power sockets for laptops & phone charging",
+      "Daily room cleaning & waste collection",
+    ],
+  },
+  {
+    sharing: 3,
+    title: "3 Sharing (Triple Room)",
+    subtitle: "Value-packed spacious room with ample storage & comfort",
+    badge: "Best Value",
+    acPrice: 6000,
+    nonAcPrice: 4000,
+    recommendedFor: "Graduates, Associates, IT Trainees & Analysts",
+    availability: "Available",
+    features: [
+      "3 Individual sturdy beds with clean bed linen sets",
+      "3 Individual lockable storage cupboards",
+      "Attached hygienic bathroom with power geyser",
+      "Spacious room layout with ample walking space",
+      "Ceiling fans + High-grade AC unit (in AC variant)",
+      "Daily housekeeping & routine sanitation",
+    ],
+  },
+  {
+    sharing: 4,
+    title: "4 Sharing (Four Bed Room)",
+    subtitle: "Budget-friendly, highly social & super economical staying",
+    badge: "Super Saver",
+    acPrice: 5000,
+    nonAcPrice: 3500,
+    recommendedFor: "Interns, Students, Freshers & Budget-conscious Seekers",
+    availability: "High Demand",
+    features: [
+      "4 Individual beds with quality foam mattresses",
+      "4 Individual secure cupboards for valuables",
+      "Attached clean bathroom with shower & hot geyser",
+      "24-Hour continuous electricity & inverter power backup",
+      "Unlimited RO drinking water access",
+      "Access to washing machine & laundry terrace",
+    ],
+  },
+];
+
+export const AMENITIES_LIST: Amenity[] = [
+  {
+    id: "homely-food",
+    iconName: "Utensils",
+    title: "3-Times Homely & Fresh Meals",
+    description: "Nutritious and freshly prepared South & North Indian meals cooked with quality ingredients in a sanitized kitchen.",
+    badge: "Optional +₹2,500/mo",
+    highlight: true,
+  },
+  {
+    id: "washing-machine",
+    iconName: "Shirt",
+    title: "Washing Machine & Laundry Space",
+    description: "Fully automatic washing machines available on all floors with covered terrace drying stands for your clothes.",
+    badge: "Included Free",
+    highlight: true,
+  },
+  {
+    id: "cctv-security",
+    iconName: "ShieldCheck",
+    title: "24/7 CCTV Surveillance & Safety",
+    description: "Round-the-clock security cameras covering entrances, corridors, and bike parking zones for maximum safety.",
+    badge: "24/7 Monitored",
+    highlight: true,
+  },
+  {
+    id: "ro-water",
+    iconName: "Droplets",
+    title: "Unlimited Purified RO Drinking Water",
+    description: "Multi-stage RO filter water dispensers installed on each floor with both regular and cooled drinking water.",
+    badge: "100% Pure RO",
+    highlight: true,
+  },
+  {
+    id: "electricity-backup",
+    iconName: "Zap",
+    title: "24-Hour Continuous Electricity",
+    description: "Uninterrupted 24/7 power supply with heavy-duty power backup for fans, lights, Wi-Fi, and workstations.",
+    badge: "Zero Downtime",
+    highlight: true,
+  },
+  {
+    id: "parking",
+    iconName: "Bike",
+    title: "Two-Wheeler Parking Area",
+    description: "Dedicated, well-lit, and CCTV monitored ground parking space exclusively for residents' bikes and scooters.",
+    badge: "Secure Covered Area",
+    highlight: true,
+  },
+  {
+    id: "wifi",
+    iconName: "Wifi",
+    title: "High-Speed Wi-Fi Internet",
+    description: "Dedicated fiber optic internet with seamless connectivity across all rooms for smooth remote work and meetings.",
+    badge: "High Speed Fiber",
+  },
+  {
+    id: "housekeeping",
+    iconName: "Sparkles",
+    title: "Daily Housekeeping & Sanitization",
+    description: "Professional cleaning staff cleans corridors, bathrooms, and room floors daily to ensure a pristine living atmosphere.",
+    badge: "Daily Service",
+  },
+  {
+    id: "water-geyser",
+    iconName: "Flame",
+    title: "Hot Water Geysers in Bathrooms",
+    description: "Instant hot water geysers installed in all attached bathrooms for refreshing morning baths anytime.",
+    badge: "Hot Water Ready",
+  },
+];
+
+export const FOOD_SCHEDULE: FoodMeal[] = [
+  {
+    id: "breakfast",
+    name: "Morning Breakfast",
+    timeWindow: "07:00 AM – 10:00 AM",
+    startHour: 7,
+    startMin: 0,
+    endHour: 10,
+    endMin: 0,
+    iconName: "Coffee",
+    description: "Freshly steamed and hot morning items with authentic chutneys, sambar, and hot tea/coffee.",
+    sampleMenu: [
+      "Soft Idlis with Hot Tiffin Sambar & Coconut Chutney",
+      "Crispy Roast Dosa / Onion Uthappam with Tomato Chutney",
+      "Ghee Ven Pongal / Medu Vada",
+      "Hot Fluffy Poori with Potato Masala / Aloo Gravy",
+      "Lemon Rice / Upma / Semiyd & Fresh Tea",
+    ],
+    tag: "Energizing Start",
+  },
+  {
+    id: "lunch",
+    name: "Afternoon Lunch",
+    timeWindow: "01:00 PM – 02:30 PM",
+    startHour: 13,
+    startMin: 0,
+    endHour: 14,
+    endMin: 30,
+    iconName: "Soup",
+    description: "Wholesome South Indian thali meal with unlimited hot rice, delicious curries, and fresh curd.",
+    sampleMenu: [
+      "Steamed Ponni White Rice (Unlimited)",
+      "Traditional Drumstick / Shallot Sambar",
+      "Piping Hot Pepper Garlic Rasam",
+      "Daily Fresh Vegetable Poriyal & Kootu",
+      "Crispy Appalam / Fryums & Homemade Curd / Buttermilk",
+    ],
+    tag: "Wholesome & Filling",
+  },
+  {
+    id: "dinner",
+    name: "Evening Dinner",
+    timeWindow: "07:30 PM – 09:30 PM",
+    startHour: 19,
+    startMin: 30,
+    endHour: 21,
+    endMin: 30,
+    iconName: "UtensilsCrossed",
+    description: "Light, tasty, and freshly cooked evening meals with soft breads and aromatic gravies.",
+    sampleMenu: [
+      "Soft Phulka / Wheat Chapatis with Veg Kurma / Paneer Gravy",
+      "Crispy Dosa / Variety Rice (Tomato/Pulao)",
+      "Malabar Parotta with Salna (Special Days)",
+      "Veg Fried Rice / Hakka Noodles & Sambar Rice",
+      "Freshly prepared side accompaniments",
+    ],
+    tag: "Satisfying & Fresh",
+  },
+];
+
+export const HOSTEL_RULES: HostelRule[] = [
+  {
+    id: "guest-accom",
+    iconName: "Users",
+    category: "Guest",
+    title: "Guest Accommodation Facility",
+    description: "Visiting friends or family members can stay at the PG. Guest stay is available starting from ₹400/- per day subject to prior room availability.",
+    highlight: "Starting from ₹400 / day",
+    badgeType: "info",
+  },
+  {
+    id: "guest-notice",
+    iconName: "BellRing",
+    category: "Guest",
+    title: "Prior Guest Notice Mandatory",
+    description: "You must inform the management / warden in advance before any guest arrives to register their entry and allocate bedding.",
+    highlight: "Advance management approval required",
+    badgeType: "warning",
+  },
+  {
+    id: "electricity-saving",
+    iconName: "ZapOff",
+    category: "Safety",
+    title: "Electricity & Safety Responsibility",
+    description: "Please make sure that all lights, ceiling fans, ACs, and geysers are strictly switched off before you leave your room.",
+    highlight: "Switch off appliances when leaving",
+    badgeType: "important",
+  },
+  {
+    id: "no-alcohol",
+    iconName: "Ban",
+    category: "Policy",
+    title: "Strict No-Alcohol Policy",
+    description: "Possession, consumption, or entry under the influence of liquor/alcohol is strictly forbidden inside the PG premises.",
+    highlight: "Zero Tolerance (Strictly Prohibited)",
+    badgeType: "prohibited",
+  },
+  {
+    id: "no-tobacco",
+    iconName: "CigaretteOff",
+    category: "Policy",
+    title: "Tobacco & Smoking Prohibited",
+    description: "Smoking, gutkha, pan, and all forms of tobacco products are strictly not allowed anywhere inside rooms or building corridors.",
+    highlight: "100% Smoke-Free Building",
+    badgeType: "prohibited",
+  },
+  {
+    id: "belongings-disclaimer",
+    iconName: "Lock",
+    category: "Disclaimer",
+    title: "Personal Belongings Disclaimer",
+    description: "Management is not responsible for personal belongings like gold ornaments, credit/debit cards, laptops, mobile phones, or cash. Please lock your cupboards.",
+    highlight: "Please keep valuables locked securely",
+    badgeType: "warning",
+  },
+];
+
+export const NEARBY_LANDMARKS: NearbyPlace[] = [
+  { name: "Sholinganallur Junction", category: "Transport", distance: "0.6 km", travelTime: "3 mins" },
+  { name: "ELCOT SEZ (HCL, Wipro, Tech Mahindra)", category: "IT Park", distance: "1.2 km", travelTime: "5 mins" },
+  { name: "TCS Sholinganallur (Kumaran Nagar)", category: "IT Park", distance: "1.8 km", travelTime: "6 mins" },
+  { name: "Infosys Sholinganallur / Karapakkam", category: "IT Park", distance: "2.4 km", travelTime: "7 mins" },
+  { name: "Cognizant (CTS) OMR Campus", distance: "2.1 km", category: "IT Park", travelTime: "7 mins" },
+  { name: "Vivira Mall & AGS Cinemas Navalur", category: "Shopping", distance: "3.5 km", travelTime: "10 mins" },
+  { name: "Gleneagles Global Health City", category: "Hospital", distance: "2.8 km", travelTime: "8 mins" },
+  { name: "OMR Food Street Sholinganallur", category: "Shopping", distance: "0.9 km", travelTime: "4 mins" },
+];
+
+export const FAQS = [
+  {
+    q: "What is the monthly rent and is food included?",
+    a: "Our room rent starts from ₹3,500/month for 4-sharing Non-AC up to ₹8,000/month for 1-sharing (Single) AC. Delicious 3-Times Homely Food is available as an optional add-on for just ₹2,500/month extra for all room types.",
+  },
+  {
+    q: "Can my friend or parents stay as guests for a few days?",
+    a: "Yes! Guest accommodation is gladly provided starting from ₹400/- per day. You must inform the PG management in advance so we can arrange their bed and verify entry.",
+  },
+  {
+    q: "Is there 24-hour electricity and power backup?",
+    a: "Yes, we have 24-hour continuous electricity supply with dedicated power backup for uninterrupted lighting, ventilation, and Wi-Fi during power fluctuations.",
+  },
+  {
+    q: "How close is the PG to IT companies in Sholinganallur?",
+    a: "Sri Vaikundam Men's PG is strategically located right near Sholinganallur Junction and ELCOT SEZ (HCL, Wipro, Tech Mahindra), TCS, Infosys, and Cognizant campuses are all within 5 to 10 minutes distance.",
+  },
+  {
+    q: "Is there a washing machine facility?",
+    a: "Yes, fully automatic washing machines and spacious covered terrace clothes-drying lines are available for all residents without any extra charges.",
+  },
+  {
+    q: "What is the security deposit and notice period?",
+    a: "We maintain a very nominal and refundable security deposit of ₹2,000. Just give a standard 30-day notice prior to vacating to get your deposit settled smoothly.",
+  },
+];

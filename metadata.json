@@ -1,0 +1,6 @@
+{
+  "name": "Sri Vaikundam Men's PG",
+  "description": "Modern, comfortable, and secure Men's PG in Sholinganallur, Chennai with AC/Non-AC rooms, 3-times homely food, rent calculator, and instant visit booking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
