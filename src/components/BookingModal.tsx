@@ -16,7 +16,8 @@ import {
   ArrowRight,
   ShieldCheck,
   Database,
-  CloudCheck
+  Info,
+  AlertCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { SharingType, RoomType, BookingSubmission } from '../types';
@@ -41,50 +42,91 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   initialConfig,
   onBookingSuccess,
 }) => {
+  // All fields start completely empty/unselected by default
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
-  const [sharing, setSharing] = useState<SharingType>(initialConfig?.sharing || 2);
-  const [roomType, setRoomType] = useState<RoomType>(initialConfig?.roomType || 'ac');
-  const [foodIncluded, setFoodIncluded] = useState<boolean>(
-    initialConfig?.foodIncluded !== undefined ? initialConfig.foodIncluded : true
-  );
-  const [occupation, setOccupation] = useState<'IT Employee' | 'Student' | 'Business / Other'>('IT Employee');
+  const [sharing, setSharing] = useState<string>('');
+  const [roomType, setRoomType] = useState<string>('');
+  const [foodOption, setFoodOption] = useState<string>('');
+  const [occupation, setOccupation] = useState<string>('');
   const [companyOrCollege, setCompanyOrCollege] = useState('');
   const [moveInDate, setMoveInDate] = useState('');
   const [notes, setNotes] = useState('');
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedBooking, setSubmittedBooking] = useState<BookingSubmission | null>(null);
   const [copiedRef, setCopiedRef] = useState(false);
   const [supabaseSaved, setSupabaseSaved] = useState<boolean | null>(null);
 
-  // Sync initialConfig changes when modal opens
+  // Reset form states when modal opens or initialConfig changes
   useEffect(() => {
-    if (initialConfig) {
-      if (initialConfig.sharing) setSharing(initialConfig.sharing);
-      if (initialConfig.roomType) setRoomType(initialConfig.roomType);
-      if (initialConfig.foodIncluded !== undefined) setFoodIncluded(initialConfig.foodIncluded);
+    if (isOpen) {
+      setFullName('');
+      setPhone('');
+      setSharing(initialConfig?.sharing ? String(initialConfig.sharing) : '');
+      setRoomType(initialConfig?.roomType || '');
+      setFoodOption(
+        initialConfig?.foodIncluded !== undefined
+          ? (initialConfig.foodIncluded ? 'yes' : 'no')
+          : ''
+      );
+      setOccupation('');
+      setCompanyOrCollege('');
+      setMoveInDate('');
+      setNotes('');
+      setValidationError(null);
+      setSubmittedBooking(null);
+      setSupabaseSaved(null);
     }
-  }, [initialConfig, isOpen]);
-
-  // Set default date to tomorrow in local time format YYYY-MM-DD
-  useEffect(() => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const dateStr = tomorrow.toISOString().split('T')[0];
-    setMoveInDate(dateStr);
-  }, []);
+  }, [isOpen, initialConfig]);
 
   if (!isOpen) return null;
 
-  const rentCalc = calculateRent(sharing, roomType, foodIncluded);
+  // Dynamic Rent Calculation only when all 3 required choices are selected
+  const isRentReady = Boolean(sharing && roomType && foodOption);
+  const rentCalc = isRentReady
+    ? calculateRent(Number(sharing) as SharingType, roomType as RoomType, foodOption === 'yes')
+    : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim() || !phone.trim()) {
-      alert('Please provide your Full Name and Mobile Number.');
+    setValidationError(null);
+
+    // Form validations
+    if (!fullName.trim()) {
+      setValidationError('Please enter your full name.');
       return;
     }
+    if (!phone.trim() || phone.trim().length < 10) {
+      setValidationError('Please provide a valid 10-digit mobile number.');
+      return;
+    }
+    if (!sharing) {
+      setValidationError('Please select your room sharing preference (1, 2, 3, or 4 Sharing).');
+      return;
+    }
+    if (!roomType) {
+      setValidationError('Please select your room type (AC or Non-AC).');
+      return;
+    }
+    if (!foodOption) {
+      setValidationError('Please select your food preference (Yes or No).');
+      return;
+    }
+    if (!occupation) {
+      setValidationError('Please select your occupation.');
+      return;
+    }
+    if (!moveInDate) {
+      setValidationError('Please select your preferred move-in / visit date.');
+      return;
+    }
+
+    const parsedSharing = Number(sharing) as SharingType;
+    const parsedRoomType = roomType as RoomType;
+    const parsedFood = foodOption === 'yes';
+    const computedRent = calculateRent(parsedSharing, parsedRoomType, parsedFood);
 
     setIsSubmitting(true);
 
@@ -93,14 +135,14 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       createdAt: new Date().toISOString(),
       fullName: fullName.trim(),
       phone: phone.trim(),
-      roomType,
-      sharing,
-      foodIncluded,
-      occupation,
+      roomType: parsedRoomType,
+      sharing: parsedSharing,
+      foodIncluded: parsedFood,
+      occupation: occupation as any,
       companyOrCollege: companyOrCollege.trim() || undefined,
-      moveInDate: moveInDate || 'Immediate',
+      moveInDate: moveInDate,
       notes: notes.trim() || undefined,
-      totalMonthlyRent: rentCalc.totalMonthly,
+      totalMonthlyRent: computedRent.totalMonthly,
       status: 'Visit Scheduled',
     };
 
@@ -136,6 +178,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   const handleResetAndClose = () => {
     setSubmittedBooking(null);
+    setValidationError(null);
     onClose();
   };
 
@@ -293,8 +336,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               {/* Name & Phone */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Full Name *
+                  <label htmlFor="input-full-name" className="block text-xs font-bold text-slate-700 mb-1">
+                    Full Name <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -303,15 +346,18 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                       required
                       placeholder="e.g. Rahul Sharma"
                       value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
+                      onChange={(e) => {
+                        setFullName(e.target.value);
+                        if (validationError) setValidationError(null);
+                      }}
                       className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-xs sm:text-sm focus:border-amber-500 focus:bg-white focus:outline-none placeholder:text-slate-400 font-medium"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Mobile Number *
+                  <label htmlFor="input-mobile-number" className="block text-xs font-bold text-slate-700 mb-1">
+                    Mobile Number <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -320,7 +366,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                       required
                       placeholder="e.g. 9876543210"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        if (validationError) setValidationError(null);
+                      }}
                       className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-xs sm:text-sm focus:border-amber-500 focus:bg-white focus:outline-none placeholder:text-slate-400 font-mono font-medium"
                     />
                   </div>
@@ -330,32 +379,46 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               {/* Room Sharing & AC Type */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Room Sharing Preference
+                  <label htmlFor="select-sharing-preference" className="block text-xs font-bold text-slate-700 mb-1">
+                    Room Sharing Preference <span className="text-rose-500">*</span>
                   </label>
                   <select
                     id="select-sharing-preference"
+                    required
                     value={sharing}
-                    onChange={(e) => setSharing(Number(e.target.value) as SharingType)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-xs sm:text-sm focus:border-amber-500 focus:bg-white focus:outline-none font-medium"
+                    onChange={(e) => {
+                      setSharing(e.target.value);
+                      if (validationError) setValidationError(null);
+                    }}
+                    className={`w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm focus:border-amber-500 focus:bg-white focus:outline-none font-medium ${
+                      sharing ? 'bg-stone-50 text-slate-900 border-stone-200' : 'bg-stone-50 text-slate-500 border-stone-200'
+                    }`}
                   >
-                    <option value={1}>1 Sharing (Single Room)</option>
-                    <option value={2}>2 Sharing (Twin Room)</option>
-                    <option value={3}>3 Sharing (Triple Room)</option>
-                    <option value={4}>4 Sharing (Saver Room)</option>
+                    <option value="">-- Select Sharing (1, 2, 3, or 4 Sharing) --</option>
+                    <option value="1">1 Sharing (Single Room)</option>
+                    <option value="2">2 Sharing (Twin Room)</option>
+                    <option value="3">3 Sharing (Triple Room)</option>
+                    <option value="4">4 Sharing (Saver Room)</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Room Type (AC / Non-AC)
+                  <label htmlFor="select-room-type" className="block text-xs font-bold text-slate-700 mb-1">
+                    Room Type (AC / Non-AC) <span className="text-rose-500">*</span>
                   </label>
                   <select
                     id="select-room-type"
+                    required
                     value={roomType}
-                    onChange={(e) => setRoomType(e.target.value as RoomType)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-xs sm:text-sm focus:border-amber-500 focus:bg-white focus:outline-none font-medium"
+                    onChange={(e) => {
+                      setRoomType(e.target.value);
+                      if (validationError) setValidationError(null);
+                    }}
+                    className={`w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm focus:border-amber-500 focus:bg-white focus:outline-none font-medium ${
+                      roomType ? 'bg-stone-50 text-slate-900 border-stone-200' : 'bg-stone-50 text-slate-500 border-stone-200'
+                    }`}
                   >
+                    <option value="">-- Select Room Type (AC / Non-AC) --</option>
                     <option value="ac">Air Conditioned (AC)</option>
                     <option value="non-ac">Non-AC Room</option>
                   </select>
@@ -365,30 +428,44 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               {/* Food Required & Occupation */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Include 3-Times Homely Food?
+                  <label htmlFor="select-food-required" className="block text-xs font-bold text-slate-700 mb-1">
+                    Include 3-Times Homely Food? <span className="text-rose-500">*</span>
                   </label>
                   <select
                     id="select-food-required"
-                    value={foodIncluded ? 'yes' : 'no'}
-                    onChange={(e) => setFoodIncluded(e.target.value === 'yes')}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-xs sm:text-sm focus:border-amber-500 focus:bg-white focus:outline-none font-medium"
+                    required
+                    value={foodOption}
+                    onChange={(e) => {
+                      setFoodOption(e.target.value);
+                      if (validationError) setValidationError(null);
+                    }}
+                    className={`w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm focus:border-amber-500 focus:bg-white focus:outline-none font-medium ${
+                      foodOption ? 'bg-stone-50 text-slate-900 border-stone-200' : 'bg-stone-50 text-slate-500 border-stone-200'
+                    }`}
                   >
+                    <option value="">-- Select Food Preference (Yes - ₹2,500 / No) --</option>
                     <option value="yes">Yes (+₹2,500/mo - 3 Meals)</option>
                     <option value="no">No (Room Only)</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Occupation
+                  <label htmlFor="select-occupation" className="block text-xs font-bold text-slate-700 mb-1">
+                    Occupation <span className="text-rose-500">*</span>
                   </label>
                   <select
                     id="select-occupation"
+                    required
                     value={occupation}
-                    onChange={(e) => setOccupation(e.target.value as any)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-xs sm:text-sm focus:border-amber-500 focus:bg-white focus:outline-none font-medium"
+                    onChange={(e) => {
+                      setOccupation(e.target.value);
+                      if (validationError) setValidationError(null);
+                    }}
+                    className={`w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm focus:border-amber-500 focus:bg-white focus:outline-none font-medium ${
+                      occupation ? 'bg-stone-50 text-slate-900 border-stone-200' : 'bg-stone-50 text-slate-500 border-stone-200'
+                    }`}
                   >
+                    <option value="">-- Select Occupation --</option>
                     <option value="IT Employee">IT / Tech Professional</option>
                     <option value="Student">College Student / Intern</option>
                     <option value="Business / Other">Business / Other</option>
@@ -399,20 +476,24 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               {/* Preferred Date & Company */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Preferred Move-in / Visit Date
+                  <label htmlFor="input-move-in-date" className="block text-xs font-bold text-slate-700 mb-1">
+                    Preferred Move-in / Visit Date <span className="text-rose-500">*</span>
                   </label>
                   <input
                     id="input-move-in-date"
                     type="date"
+                    required
                     value={moveInDate}
-                    onChange={(e) => setMoveInDate(e.target.value)}
+                    onChange={(e) => {
+                      setMoveInDate(e.target.value);
+                      if (validationError) setValidationError(null);
+                    }}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-xs sm:text-sm focus:border-amber-500 focus:bg-white focus:outline-none font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label htmlFor="input-company-college" className="block text-xs font-bold text-slate-700 mb-1">
                     Company / College Name (Optional)
                   </label>
                   <input
@@ -426,20 +507,43 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 </div>
               </div>
 
-              {/* Live Estimated Rent Preview Banner */}
-              <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200 flex items-center justify-between">
-                <div>
-                  <div className="text-xs text-slate-500 font-medium">Calculated Monthly Rent:</div>
-                  <div className="text-base sm:text-lg font-black text-slate-900 font-sans">
-                    {formatINR(rentCalc.totalMonthly)}
-                    <span className="text-xs text-slate-500 font-normal"> / month</span>
+              {/* Dynamic Rent Calculation & Summary */}
+              {isRentReady && rentCalc ? (
+                <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-200">
+                  <div>
+                    <div className="text-xs text-amber-900 font-bold">Calculated Monthly Rent:</div>
+                    <div className="text-lg sm:text-xl font-black text-slate-900 font-sans">
+                      {formatINR(rentCalc.totalMonthly)}
+                      <span className="text-xs text-slate-600 font-normal"> / month</span>
+                    </div>
+                  </div>
+                  <div className="text-left sm:text-right text-[11px] text-slate-600 font-medium">
+                    <div>Room ({sharing} Sharing {roomType.toUpperCase()}): <strong className="text-slate-900">{formatINR(rentCalc.baseRent)}</strong></div>
+                    {foodOption === 'yes' ? (
+                      <span className="block text-emerald-800 font-bold">+ Homely 3-Times Food: ₹2,500</span>
+                    ) : (
+                      <span className="block text-slate-500">Food: Not Included (Room Only)</span>
+                    )}
                   </div>
                 </div>
-                <div className="text-right text-[11px] text-slate-500 font-medium">
-                  <span>Room: {formatINR(rentCalc.baseRent)}</span>
-                  {foodIncluded && <span className="block text-amber-800 font-bold">+ Food: ₹2,500</span>}
+              ) : (
+                <div className="p-3.5 rounded-2xl bg-stone-100/90 border border-dashed border-stone-300 flex items-center gap-3 text-slate-600">
+                  <div className="w-8 h-8 rounded-xl bg-stone-200/80 text-amber-700 flex items-center justify-center shrink-0">
+                    <Info className="w-4 h-4" />
+                  </div>
+                  <p className="text-xs font-medium text-slate-600">
+                    Please select sharing, room type & food preference to view monthly rent
+                  </p>
                 </div>
-              </div>
+              )}
+
+              {/* Validation Warning Alert */}
+              {validationError && (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-150">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span>{validationError}</span>
+                </div>
+              )}
 
               {/* Submit CTA */}
               <button

@@ -78,9 +78,7 @@ export default function App() {
     roomType?: RoomType;
     foodIncluded?: boolean;
   }) => {
-    if (prefill) {
-      setBookingPrefill(prefill);
-    }
+    setBookingPrefill(prefill || undefined);
     setIsBookingModalOpen(true);
   };
 
