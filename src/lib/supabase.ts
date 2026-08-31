@@ -143,3 +143,44 @@ export async function fetchBookingsFromSupabase(): Promise<{ data: BookingSubmis
     return { data: [], error: err?.message || 'Network error' };
   }
 }
+
+export async function updateBookingStatusInSupabase(
+  id: string, 
+  status: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status })
+      .eq('id', id);
+
+    if (error) {
+      console.warn('Supabase update status error:', error.message);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    console.error('Error updating booking status in Supabase:', err);
+    return { success: false, error: err?.message || 'Network error' };
+  }
+}
+
+export async function deleteBookingFromSupabase(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase
+      .from('bookings')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.warn('Supabase delete error:', error.message);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    console.error('Error deleting booking from Supabase:', err);
+    return { success: false, error: err?.message || 'Network error' };
+  }
+}

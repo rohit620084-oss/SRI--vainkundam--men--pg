@@ -75,5 +75,5 @@ export interface BookingSubmission {
   moveInDate: string;
   notes?: string;
   totalMonthlyRent: number;
-  status: 'Confirmed' | 'Pending Review' | 'Visit Scheduled';
+  status: 'Confirmed' | 'Pending Review' | 'Visit Scheduled' | 'Visited' | 'Checked-in' | 'Cancelled';
 }

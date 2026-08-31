@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, MessageSquare, MapPin, ShieldCheck, ArrowUp, Building2, Sparkles, Clock, FileText, Home } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, ShieldCheck, ArrowUp, Building2, Sparkles, Clock, FileText, Home, Lock } from 'lucide-react';
 import { PG_INFO, CONTACT_NUMBERS } from '../data/pgData';
 import { getQuickWhatsAppLink } from '../utils/helpers';
 import { TabType } from '../types';
@@ -7,9 +7,10 @@ import { TabType } from '../types';
 interface FooterProps {
   onSelectTab: (tab: TabType) => void;
   onOpenBooking: () => void;
+  onOpenAdmin: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onSelectTab, onOpenBooking }) => {
+export const Footer: React.FC<FooterProps> = ({ onSelectTab, onOpenBooking, onOpenAdmin }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -160,8 +161,18 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab, onOpenBooking }) =>
 
         {/* Bottom Bar */}
         <div className="pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500 font-medium">
-          <div>
-            © {new Date().getFullYear()} Sri Vaikundam Men's PG, Sholinganallur, Chennai. All rights reserved.
+          <div className="flex items-center gap-3">
+            <span>© {new Date().getFullYear()} Sri Vaikundam Men's PG, Sholinganallur, Chennai. All rights reserved.</span>
+            <span>•</span>
+            <button
+              id="footer-admin-portal-link"
+              onClick={onOpenAdmin}
+              className="inline-flex items-center gap-1 text-slate-400 hover:text-amber-400 transition-colors cursor-pointer"
+              title="Open Owner / Admin Portal"
+            >
+              <Lock className="w-3 h-3 text-slate-500" />
+              <span>Owner Login / Admin Portal</span>
+            </button>
           </div>
           <button
             onClick={scrollToTop}

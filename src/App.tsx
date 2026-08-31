@@ -11,6 +11,8 @@ import { BookingModal } from './components/BookingModal';
 import { BookingHistoryDrawer } from './components/BookingHistoryDrawer';
 import { FloatingActions } from './components/FloatingActions';
 import { PageViewHeader } from './components/PageViewHeader';
+import { AdminLoginModal } from './components/AdminLoginModal';
+import { AdminDashboardModal } from './components/AdminDashboardModal';
 import { SharingType, RoomType, BookingSubmission, TabType } from './types';
 import { getSavedBookings, syncBookingsWithSupabase } from './utils/helpers';
 
@@ -18,6 +20,16 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
+  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
+  const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState(false);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('sv_admin_auth') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   const [bookingPrefill, setBookingPrefill] = useState<{
     sharing?: SharingType;
     roomType?: RoomType;
@@ -85,6 +97,29 @@ export default function App() {
   const handleClearBookings = () => {
     localStorage.removeItem('sri_vaikundam_bookings');
     setSavedBookings([]);
+  };
+
+  const handleOpenAdmin = () => {
+    if (isAdminAuthenticated) {
+      setIsAdminDashboardOpen(true);
+    } else {
+      setIsAdminLoginOpen(true);
+    }
+  };
+
+  const handleAdminAuthenticated = () => {
+    setIsAdminAuthenticated(true);
+    setIsAdminDashboardOpen(true);
+  };
+
+  const handleAdminLogout = () => {
+    try {
+      sessionStorage.removeItem('sv_admin_auth');
+    } catch {
+      // ignore
+    }
+    setIsAdminAuthenticated(false);
+    setIsAdminDashboardOpen(false);
   };
 
   return (
@@ -179,10 +214,14 @@ export default function App() {
       <Footer
         onSelectTab={handleTabChange}
         onOpenBooking={() => handleOpenBooking()}
+        onOpenAdmin={handleOpenAdmin}
       />
 
       {/* Floating Actions: Always accessible across all pages */}
-      <FloatingActions onOpenBooking={() => handleOpenBooking()} />
+      <FloatingActions 
+        onOpenBooking={() => handleOpenBooking()} 
+        onOpenAdmin={handleOpenAdmin}
+      />
 
       {/* Schedule Visit / Booking Modal */}
       <BookingModal
@@ -199,6 +238,21 @@ export default function App() {
         bookings={savedBookings}
         onClearBookings={handleClearBookings}
         onRefreshBookings={refreshBookings}
+      />
+
+      {/* Owner / Admin PIN Login Modal */}
+      <AdminLoginModal
+        isOpen={isAdminLoginOpen}
+        onClose={() => setIsAdminLoginOpen(false)}
+        onAuthenticated={handleAdminAuthenticated}
+      />
+
+      {/* Owner / Admin Management Dashboard Modal */}
+      <AdminDashboardModal
+        isOpen={isAdminDashboardOpen}
+        onClose={() => setIsAdminDashboardOpen(false)}
+        onLogout={handleAdminLogout}
+        onBookingsUpdated={refreshBookings}
       />
     </div>
   );

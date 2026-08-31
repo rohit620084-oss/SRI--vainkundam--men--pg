@@ -1,6 +1,11 @@
 import { SharingType, RoomType, BookingSubmission } from '../types';
 import { PG_INFO, ROOM_TARIFFS, FOOD_SCHEDULE } from '../data/pgData';
-import { saveBookingToSupabase, fetchBookingsFromSupabase } from '../lib/supabase';
+import { 
+  saveBookingToSupabase, 
+  fetchBookingsFromSupabase, 
+  updateBookingStatusInSupabase, 
+  deleteBookingFromSupabase 
+} from '../lib/supabase';
 
 export function calculateRent(sharing: SharingType, roomType: RoomType, includeFood: boolean) {
   const tariff = ROOM_TARIFFS.find((t) => t.sharing === sharing) || ROOM_TARIFFS[1];
@@ -168,4 +173,56 @@ export async function syncBookingsWithSupabase(): Promise<BookingSubmission[]> {
     console.error('Error syncing bookings with Supabase:', err);
     return local;
   }
+}
+
+export async function updateBookingStatus(
+  id: string, 
+  newStatus: BookingSubmission['status']
+): Promise<BookingSubmission[]> {
+  const current = getSavedBookings();
+  const updated = current.map((b) => (b.id === id ? { ...b, status: newStatus } : b));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+
+  // Sync to Supabase in background
+  updateBookingStatusInSupabase(id, newStatus).catch((err) => {
+    console.warn('Supabase status sync error:', err);
+  });
+
+  return updated;
+}
+
+export async function deleteBookingItem(id: string): Promise<BookingSubmission[]> {
+  const current = getSavedBookings();
+  const updated = current.filter((b) => b.id !== id);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+
+  // Sync to Supabase in background
+  deleteBookingFromSupabase(id).catch((err) => {
+    console.warn('Supabase delete sync error:', err);
+  });
+
+  return updated;
+}
+
+export function getOwnerFollowUpWhatsAppLink(booking: BookingSubmission): string {
+  const cleanPhone = booking.phone.replace(/[^0-9]/g, '');
+  const targetPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+  const sharingText = `${booking.sharing} Sharing (${booking.roomType.toUpperCase()})`;
+
+  const text = `Hello ${booking.fullName},
+
+Greetings from *Sri Vaikundam Men's PG*, Sholinganallur! 🌟
+
+We received your inquiry (Ref: *${booking.id}*) for *${sharingText}* with *${booking.foodIncluded ? '3-Times Homely Food' : 'Room Only'}*.
+
+Your planned visit/move-in date: *${booking.moveInDate || 'Upcoming'}*.
+
+Please let us know what time suits you best for a room walkthrough today. 
+
+📍 *Location:* Behind Arvind Theatre, Karapakkam / Sholinganallur, Chennai.
+📞 *Contact:* +91 ${PG_INFO.primaryPhone}
+
+Looking forward to welcoming you!`;
+
+  return `https://wa.me/${targetPhone}?text=${encodeURIComponent(text)}`;
 }
