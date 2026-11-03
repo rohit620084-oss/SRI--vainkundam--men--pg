@@ -25,7 +25,8 @@ import {
   Briefcase,
   ChevronDown,
   Sparkles,
-  Info
+  Info,
+  Mail
 } from 'lucide-react';
 import { BookingSubmission, RoomType, SharingType } from '../types';
 import { 
@@ -268,6 +269,10 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-950/80 text-emerald-400 text-[10px] font-mono font-bold border border-emerald-800">
                   <Database className="w-2.5 h-2.5" />
                   <span>Supabase Live</span>
+                </span>
+                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-950/80 text-amber-300 text-[10px] font-mono font-bold border border-amber-800/80">
+                  <Mail className="w-2.5 h-2.5" />
+                  <span>EmailJS service_o63qngn</span>
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-medium">Sri Vaikundam Men's PG • Sholinganallur, Chennai</p>

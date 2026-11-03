@@ -17,13 +17,20 @@ import {
   ShieldCheck,
   Database,
   Info,
-  AlertCircle
+  AlertCircle,
+  Mail
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { SharingType, RoomType, BookingSubmission } from '../types';
 import { PG_INFO } from '../data/pgData';
 import { calculateRent, formatINR, generateBookingId, getWhatsAppBookingLink, saveBooking } from '../utils/helpers';
 import { saveBookingToSupabase } from '../lib/supabase';
+import emailjs, { 
+  EMAILJS_SERVICE_ID, 
+  EMAILJS_TEMPLATE_ID, 
+  EMAILJS_PUBLIC_KEY,
+  sendBookingEmailNotification 
+} from '../lib/emailjs';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -153,6 +160,34 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     const supabaseRes = await saveBookingToSupabase(newBooking);
     setSupabaseSaved(supabaseRes.success);
 
+    // Automated EmailJS notification (Triggered right after saving to Supabase in non-blocking background)
+    try {
+      const emailParams = {
+        booking_id: newBooking.id,
+        name: newBooking.fullName,
+        phone: newBooking.phone,
+        occupation: newBooking.occupation + (newBooking.companyOrCollege ? ` (${newBooking.companyOrCollege})` : ''),
+        room_preference: `${newBooking.sharing} Sharing ${newBooking.roomType.toUpperCase()}`,
+        food_included: newBooking.foodIncluded ? 'Yes (3 Times Homely South Indian Food Included)' : 'No (Room Only)',
+        rent: `${formatINR(newBooking.totalMonthlyRent)} / month`,
+        visit_date: newBooking.moveInDate,
+        notes: newBooking.notes || 'None',
+      };
+
+      emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        emailParams,
+        EMAILJS_PUBLIC_KEY
+      ).then((res) => {
+        console.log('[EmailJS] Booking notification sent successfully:', res.status, res.text);
+      }).catch((emailErr) => {
+        console.warn('[EmailJS] Non-blocking automated email notification error:', emailErr?.text || emailErr?.message || emailErr);
+      });
+    } catch (triggerErr) {
+      console.warn('[EmailJS] Automated email trigger failed silently (non-blocking):', triggerErr);
+    }
+
     setIsSubmitting(false);
     setSubmittedBooking(newBooking);
     if (onBookingSuccess) onBookingSuccess();
@@ -241,10 +276,17 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 </button>
               </div>
 
-              {/* Supabase Status Indicator */}
-              <div className="mt-2.5 pt-2 border-t border-stone-200/80 flex items-center justify-center gap-1.5 text-[11px] text-emerald-800 font-bold">
-                <Database className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Saved & Synced to Supabase Database</span>
+              {/* Sync & Notification Status Indicators */}
+              <div className="mt-2.5 pt-2 border-t border-stone-200/80 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] font-bold">
+                <span className="flex items-center gap-1 text-emerald-800">
+                  <Database className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Synced to Supabase</span>
+                </span>
+                <span className="text-stone-300">•</span>
+                <span className="flex items-center gap-1 text-amber-900">
+                  <Mail className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Email Notification Triggered</span>
+                </span>
               </div>
             </div>
 
